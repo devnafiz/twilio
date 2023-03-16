@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\VerificationCode;
 use Carbon\Carbon;
 use Auth;
+use Twilio\Rest\Client;
 class AuthOtpController extends Controller
 {
     public function login(){
@@ -28,6 +29,24 @@ class AuthOtpController extends Controller
     	$message= "Your Otp to login -:".$verificationCode->otp;
 
     	//now use mobile  sms gtway
+
+      try {
+         $accout_sid= env('TWILIO_SID');
+         $accout_token= env('TWILIO_TOKEN');
+         $accout_from= env('TWILIO_FROM');
+         //dd($accout_from);
+
+
+         $client =new  Client($accout_sid,$accout_token);
+         dd( $client);
+         $client->message->create('+88'.$request->mobile_no,[
+            'from'=> $accout_from,
+            'body' =>$message
+         ]);
+        
+      } catch (\Exception $e) {
+       return  $e->getMessage();
+      }
 
     	return redirect()->route('otp.verification',['user_id' => $verificationCode->user_id])->with('success',$message);
 
